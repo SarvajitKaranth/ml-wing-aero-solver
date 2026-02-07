@@ -48,6 +48,15 @@ This project uses trained scikit-learn models:
 cl_model.pkl — Lift coefficient predictor
 
 cd_model.pkl — Drag coefficient predictor
+## Alternate models
+
+The models in the repo are compressed down to fit within the limit of what I could upload. 
+
+Use this link to download full models which should be faster and more accurate: 
+
+[My Google Drive](https://drive.google.com/file/d/11PawroYHNoYVtxfW8PayAuaXronWwl93/view?usp=drive_link)
+
+Unzip the files, and replace the existing .pkl files in models_2d with these ones. They should be 7M KB big each.
 
 ## Inputs:
 Number of sections
@@ -96,3 +105,4 @@ Connect with me on **[LinkedIn](https://www.linkedin.com/in/sarvajit-karanth-126
 Aerospace Engineering Student @ Purdue Univerrsity
 
 Interested in CFD, Machine Learning, and Aircraft Design
+
