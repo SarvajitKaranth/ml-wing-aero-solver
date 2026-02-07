@@ -40,7 +40,7 @@ cd ml-wing-aero-solver
 Install dependencies:
 
 pip install -r requirements.txt
-
+```
 ## Machine Learning Models
 
 This project uses trained scikit-learn models:
@@ -63,7 +63,9 @@ Velocity
 Wing span
 
 m represents the first number in 4 digit naca code. Ranges between 0 and 0.09. (enter 0.02 for the 2 in naca 2412)
+
 p represents the second number in 4 digit naca code. Ranges between 0 and 0.9. (enter 0.4 for the 4 in naca 2412)
+
 t represents the last two numberrs in 4 digit naca code. Ranges between 0 and 0.18. (enter 0.12 for the 12 in naca 2412)
 
 
@@ -89,5 +91,8 @@ GPU acceleration
 
 Sarvajit Karanth
 
+Connect with me on **[LinkedIn](https://www.linkedin.com/in/sarvajit-karanth-1264a31b4/)**!
+
 Aerospace Engineering Student @ Purdue Univerrsity
+
 Interested in CFD, Machine Learning, and Aircraft Design
