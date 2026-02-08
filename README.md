@@ -61,9 +61,13 @@ Unzip the files, and replace the existing .pkl files in models_2d with these one
 ## Inputs:
 Number of sections
 For each section: 
+
 Spanwise position
+
 Chord Length
+
 Twist
+
 NACA parameters (m, p, t) 
 
 After:
@@ -105,4 +109,5 @@ Connect with me on **[LinkedIn](https://www.linkedin.com/in/sarvajit-karanth-126
 Aerospace Engineering Student @ Purdue Univerrsity
 
 Interested in CFD, Machine Learning, and Aircraft Design
+
 
