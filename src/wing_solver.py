@@ -29,10 +29,38 @@ PI  = np.pi
 # ================================
 # USER INPUT
 # ================================
+def get_float(prompt, min_val=None, max_val=None):
 
+    while True:
+        try:
+            val = float(input(prompt))
+            if min_val is not None and val < min_val:
+                print(f"Value must be greater than {min_val}")
+                continue
+            if max_val is not None and val > max_val:
+                print(f"Value must be less than {max_val}")
+                continue
+            return val
+        except ValueError:
+            print("Invalid input. Please enter a number")
+def get_int(prompt, min_val=None, max_val=None):
+
+    while True:
+        try:
+            val = int(input(prompt))
+            if min_val is not None and val < min_val:
+                print(f"Value must be greater than {min_val}")
+                continue
+            if max_val is not None and val > max_val:
+                print(f"Value must be less than {max_val}")
+                continue
+            return val
+        except ValueError:
+            print("Invalid input. Please enter a number")
+        
 def get_user_sections():
 
-    n = int(input("Number of wing sections: "))
+    n = get_int("Number of wing sections: ")
 
     sections = []
 
@@ -44,12 +72,13 @@ def get_user_sections():
 
         sec = {}
 
-        sec["y"] = float(input("Spanwise position y (m, from root): "))
-        sec["chord"] = float(input("Chord (m): "))
-        sec["twist"] = float(input("Twist (deg, +up): "))
-        sec["m"] = float(input("NACA camber m: "))
-        sec["p"] = float(input("NACA camber pos p: "))
-        sec["t"] = float(input("NACA thickness t: "))
+        sec["y"] = get_float("Spanwise position y (m, from root): ", min_val=0)
+        sec["chord"] = get_float("Chord (m): ", min_val=0)
+        sec["twist"] = get_float("Twist (deg, +up): ")
+        sec["sweep"] = np.radians(get_float("Quarter-chord sweep (deg): "))
+        sec["m"] = get_float("NACA camber m: ", min_val=0, max_val= 0.09)
+        sec["p"] = get_float("NACA camber pos p: ", min_val=0, max_val=0.9)
+        sec["t"] = get_float("NACA thickness t: ", min_val=0, max_val=0.18)
 
         sections.append(sec)
 
@@ -60,9 +89,9 @@ def get_flight_conditions():
 
     print("\n--- Flight Conditions ---")
 
-    alpha = float(input("Angle of attack (deg): "))
-    V = float(input("Velocity (m/s): "))
-    b = float(input("Wing span (m): "))
+    alpha = get_float("Angle of attack (deg): ")
+    V = get_float("Velocity (m/s): ", min_val=0)
+    b = get_float("Wing span (m): ", min_val=0)
 
     return alpha, V, b
 
@@ -71,7 +100,7 @@ def get_flight_conditions():
 # CORE SOLVER
 # ================================
 
-def solve_wing(sections, span, alpha_deg, V, N=60):
+def solve_wing(sections, span, alpha_deg,V, N=60):
 
     b2 = span / 2
 
@@ -85,6 +114,7 @@ def solve_wing(sections, span, alpha_deg, V, N=60):
     m_sec = np.array([s["m"] for s in sections])
     p_sec = np.array([s["p"] for s in sections])
     th_sec = np.array([s["t"] for s in sections])
+    sweep_sec = np.array([s["sweep"] for s in sections])
 
     # Spanwise grid
     y = np.linspace(0, b2, N)
@@ -95,6 +125,7 @@ def solve_wing(sections, span, alpha_deg, V, N=60):
     m = np.interp(y, y_sec, m_sec)
     p = np.interp(y, y_sec, p_sec)
     th = np.interp(y, y_sec, th_sec)
+    sweep = np.interp(y, y_sec, sweep_sec)
 
     # Dynamic pressure
     q = 0.5 * RHO * V**2
@@ -106,11 +137,12 @@ def solve_wing(sections, span, alpha_deg, V, N=60):
     for i in range(N):
 
         # Effective AoA (deg)
-        alpha_eff = alpha_deg + twist[i]
+        sweepAngle = sweep[i]
+        alpha_eff = (alpha_deg + twist[i]) * np.cos(sweepAngle)
 
         # Reynolds number
-        Re = RHO * V * chord[i] / MU
-
+        V_eff = V * np.cos(sweepAngle)
+        Re = RHO * V_eff * chord[i] / MU
         # Input for ML
         X = pd.DataFrame([{
             "AoA": alpha_eff,
@@ -122,6 +154,7 @@ def solve_wing(sections, span, alpha_deg, V, N=60):
 
         # Predict
         Cl = cl_model.predict(X)[0]
+        Cl = Cl * (np.cos(sweepAngle)**2)
         Cd = cd_model.predict(X)[0]
 
         # Section forces
@@ -142,7 +175,7 @@ def solve_wing(sections, span, alpha_deg, V, N=60):
 
     # Induced drag (Oswald efficiency)
     e = 0.85
-    CDi = CL**2 / (PI * AR * e)
+    CDi = CL**2 / (PI * AR * e * (np.cos(sweepAngle)**2))
 
     CD = CDp + CDi
 
